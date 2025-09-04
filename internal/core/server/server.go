@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"mocky/internal/api/health"
+	"mocky/internal/api/v1/prototypes"
 	"mocky/internal/core/router"
 	"mocky/internal/core/settings"
 
@@ -36,7 +37,8 @@ func setUpRouter() *gin.Engine {
 	// Rutas de health
 	health.SetupHealthModule(r)
 
-	// Rutas de forms
+	// Rutas de prototypes
+	prototypes.SetupPrototypesModule(r)
 
 	return r
 }
