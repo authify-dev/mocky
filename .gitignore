@@ -1,0 +1,41 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos y directorios de Go
+/bin/
+/pkg/
+/vendor/
+*.exe
+*.test
+*.out
+
+# Archivos de entorno
+.env
+
+# Archivos de dependencias y módulos
+#go.sum
+
+# Archivos y directorios de IDE/Editor
+.idea/
+.vscode/
+*.swp
+
+# Archivos de logs
+*.log
+
+# Directorios de cache y build
+/.cache
+/.build
+
+postgres-data/
+
+bootstrap
+main.zip
+
+.envs
+
+.gitlab-ci-local
+
+
+__debug_bin*
