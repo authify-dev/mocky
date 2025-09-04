@@ -73,30 +73,36 @@ func (m *MongoRepository[T, L]) Save(ctx context.Context, document T) utils.Resu
 
 // InsertDocumentWithID inserta un documento en MongoDB usando un UUID como _id
 func (m *MongoRepository[T, L]) SaveWithID(ctx context.Context, id string, document T) utils.Result[string] {
+
+	_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, fmt.Errorf("error al convertir el id: %w", err).Error(), "mongo.save_with_id")}
+	}
+
 	// Convertir el documento a BSON
 	data, err := bson.Marshal(document)
 	if err != nil {
-		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_with_id")}
+		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_with_id.marshal")}
 	}
 
 	// Deserializar el BSON a un mapa para poder modificarlo
 	var docMap bson.M
 	err = bson.Unmarshal(data, &docMap)
 	if err != nil {
-		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_with_id")}
+		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_with_id.unmarshal")}
 	}
 
 	// Establecer el _id con el valor proporcionado
-	docMap["_id"] = id
+	docMap["_id"] = _id
 
 	// Insertar el documento modificado en la colección
 	_, err = m.Collection.InsertOne(ctx, docMap)
 	if err != nil {
-		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_with_id")}
+		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_with_id.insert_one")}
 	}
 
 	// Retornar el id como confirmación
-	return utils.Result[string]{Data: id}
+	return utils.Result[string]{Data: _id.Hex()}
 }
 
 // Update actualiza un documento existente en la colección usando el id obtenido del entity.
@@ -181,8 +187,14 @@ func (m *MongoRepository[T, L]) UpdateFields(ctx context.Context, id string, upd
 
 // Delete elimina un documento de la colección usando el id proporcionado.
 func (m *MongoRepository[T, L]) Delete(ctx context.Context, id string) error {
+
+	_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return cerrs.NewCustomError(http.StatusInternalServerError, fmt.Errorf("error al convertir el id: %w", err).Error(), "mongo.delete")
+	}
+
 	// Crear el filtro usando _id
-	filter := bson.M{"_id": id}
+	filter := bson.M{"_id": _id}
 
 	// Ejecutar la eliminación
 	result, err := m.Collection.DeleteOne(ctx, filter)
