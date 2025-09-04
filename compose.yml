@@ -1,7 +1,7 @@
 services:
   mongo:
     image: mongo:6.0
-    container_name: mongo_db
+    container_name: mongo_db_mocky
     restart: always
     ports:
       - "27018:27017"
