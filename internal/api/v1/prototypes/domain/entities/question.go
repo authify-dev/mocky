@@ -78,6 +78,7 @@ package entities
 */
 
 type PrototypeEntity struct {
+	Name     string         `json:"name" binding:"required"`
 	Request  RequestEntity  `json:"request" binding:"required"`
 	Response ResponseEntity `json:"response" binding:"required"`
 }
@@ -87,7 +88,7 @@ type RequestEntity struct {
 	UrlPath    string            `json:"urlPath" binding:"required"`
 	PathParams map[string]string `json:"path_params"`
 	Headers    map[string]string `json:"headers"`
-	BodySchema BodySchemaEntity  `json:"bodySchema"`
+	BodySchema *BodySchemaEntity `json:"bodySchema"`
 
 	Delay int `json:"delay"`
 }

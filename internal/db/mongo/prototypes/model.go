@@ -12,6 +12,7 @@ type PrototypeModel struct {
 	UpdatedAt time.Time               `json:"updatedAt" bson:"updatedAt"`
 	Request   entities.RequestEntity  `json:"request" bson:"request"`
 	Response  entities.ResponseEntity `json:"response" bson:"response"`
+	Name      string                  `json:"name" bson:"name"`
 }
 
 func (g PrototypeModel) GetID() string {
@@ -23,6 +24,7 @@ type PrototypeListModel struct {
 	CreatedAt time.Time       `json:"createdAt" bson:"createdAt"`
 	UpdatedAt time.Time       `json:"updatedAt" bson:"updatedAt"`
 	Request   RequestListView `json:"request" bson:"request"`
+	Name      string          `json:"name" bson:"name"`
 }
 
 func (g PrototypeListModel) GetID() string {

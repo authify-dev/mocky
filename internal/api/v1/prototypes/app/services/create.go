@@ -20,6 +20,7 @@ func (s *PrototypesService) Create(cc *customctx.CustomContext, prototype comman
 	prototypeModel := prototypes.PrototypeModel{
 		Request:  prototypeEntity.Request,
 		Response: prototypeEntity.Response,
+		Name:     prototypeEntity.Name,
 	}
 
 	result := s.prototypesRepository.SaveOrUpdate(cc, prototypeModel)

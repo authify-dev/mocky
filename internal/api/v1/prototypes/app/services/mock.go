@@ -67,21 +67,25 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 			Success:    false,
 		}
 	}
-	propertiesResult := s.validator.Validate(prototypeModel.Data.Request.BodySchema, bodyMap)
-	if len(propertiesResult) > 0 {
 
-		for _, err := range propertiesResult {
-			entry.Error(err.String())
-			cc.NewError(cerrs.NewCustomError(http.StatusUnprocessableEntity, err.String(), "validate_body"))
+	if prototypeModel.Data.Request.BodySchema != nil && prototypeModel.Data.Request.BodySchema.TypeSchema != "" {
+
+		propertiesResult := s.validator.Validate(*prototypeModel.Data.Request.BodySchema, bodyMap)
+		if len(propertiesResult) > 0 {
+
+			for _, err := range propertiesResult {
+				entry.Error(err.String())
+				cc.NewError(cerrs.NewCustomError(http.StatusUnprocessableEntity, err.String(), "validate_body"))
+			}
+
+			return utils.Response[map[string]any]{
+				Error:      cerrs.NewCustomError(http.StatusUnprocessableEntity, propertiesResult[len(propertiesResult)-1].String(), "validate_body"),
+				StatusCode: http.StatusUnprocessableEntity,
+				Success:    false,
+			}
 		}
 
-		return utils.Response[map[string]any]{
-			Error:      cerrs.NewCustomError(http.StatusUnprocessableEntity, propertiesResult[len(propertiesResult)-1].String(), "validate_body"),
-			StatusCode: http.StatusUnprocessableEntity,
-			Success:    false,
-		}
 	}
-
 	// Contruir la respuesta
 
 	pathParamsMap := request.URL.Query()

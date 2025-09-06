@@ -10,6 +10,7 @@ import (
 type CreatePrototypeDTO struct {
 	Request  RequestDTO  `json:"request" binding:"required"`
 	Response ResponseDTO `json:"response" binding:"required"`
+	Name     string      `json:"name"`
 }
 
 func (dto CreatePrototypeDTO) Validate() error {
@@ -26,7 +27,7 @@ type RequestDTO struct {
 	UrlPath    string            `json:"urlPath" binding:"required"`
 	Headers    map[string]string `json:"headers"`
 	PathParams map[string]string `json:"path_params"`
-	BodySchema BodySchemaDTO     `json:"bodySchema"`
+	BodySchema *BodySchemaDTO    `json:"bodySchema"`
 
 	Delay int `json:"delay"`
 }
@@ -41,7 +42,7 @@ func (dto RequestDTO) Validate() error {
 		return errors.New("urlPath is required")
 	}
 
-	if dto.BodySchema.Validate() != nil {
+	if dto.BodySchema != nil && dto.BodySchema.Validate() != nil {
 		return errors.New("bodySchema is invalid: " + dto.BodySchema.Validate().Error())
 	}
 
@@ -50,12 +51,17 @@ func (dto RequestDTO) Validate() error {
 
 func (dto RequestDTO) ToEntity() entities.RequestEntity {
 
+	bodySchema := entities.BodySchemaEntity{}
+	if dto.BodySchema != nil {
+		bodySchema = dto.BodySchema.ToEntity()
+	}
+
 	return entities.RequestEntity{
 		Method:     dto.Method,
 		UrlPath:    dto.UrlPath,
 		Headers:    dto.Headers,
 		PathParams: dto.PathParams,
-		BodySchema: dto.BodySchema.ToEntity(),
+		BodySchema: &bodySchema,
 		Delay:      dto.Delay,
 	}
 }
@@ -142,6 +148,7 @@ func (dto CreatePrototypeDTO) ToCommand() commands.CreatePrototypeCommand {
 	return commands.CreatePrototypeCommand{
 		Request:  dto.Request.ToEntity(),
 		Response: dto.Response.ToEntity(),
+		Name:     dto.Name,
 	}
 }
 

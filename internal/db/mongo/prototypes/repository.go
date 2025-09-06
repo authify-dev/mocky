@@ -48,6 +48,10 @@ func (m *PrototypesMongoRepository) SaveOrUpdate(cc *customctx.CustomContext, do
 	entry := logger.FromContext(cc.Context())
 	entry.Infof("Mongo SaveOrUpdate document=%v", document)
 
+	if document.Request.BodySchema != nil && document.Request.BodySchema.TypeSchema == "" {
+		document.Request.BodySchema = nil
+	}
+
 	prototypeModel := m.GetByPath(cc, document.Request.UrlPath, document.Request.Method)
 
 	// If the prototype does not exist, we save it
