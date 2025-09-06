@@ -7,6 +7,7 @@ import (
 	"common/utils"
 	"common/utils/cerrs"
 	"net/http"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -51,6 +52,8 @@ func (m *PrototypesMongoRepository) SaveOrUpdate(cc *customctx.CustomContext, do
 
 	// If the prototype does not exist, we save it
 	if prototypeModel.Err != nil {
+		document.CreatedAt = time.Now()
+		document.UpdatedAt = time.Now()
 		return m.MongoRepository.Save(cc.Context(), document)
 	}
 
@@ -60,6 +63,8 @@ func (m *PrototypesMongoRepository) SaveOrUpdate(cc *customctx.CustomContext, do
 	if err != nil {
 		return utils.Result[string]{Err: cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "mongo.save_or_update")}
 	}
+
+	document.UpdatedAt = time.Now()
 
 	newPrototype := m.MongoRepository.SaveWithID(cc.Context(), prototypeModel.Data.ID, document)
 	if newPrototype.Err != nil {

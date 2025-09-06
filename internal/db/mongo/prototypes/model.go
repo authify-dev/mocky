@@ -1,12 +1,17 @@
 package prototypes
 
-import "mocky/internal/api/v1/prototypes/domain/entities"
+import (
+	"mocky/internal/api/v1/prototypes/domain/entities"
+	"time"
+)
 
 // Geolocalization es una implementación de Entity.
 type PrototypeModel struct {
-	ID       string                  `json:"id" bson:"_id,omitempty"`
-	Request  entities.RequestEntity  `json:"request" bson:"request"`
-	Response entities.ResponseEntity `json:"response" bson:"response"`
+	ID        string                  `json:"id" bson:"_id,omitempty"`
+	CreatedAt time.Time               `json:"createdAt" bson:"createdAt"`
+	UpdatedAt time.Time               `json:"updatedAt" bson:"updatedAt"`
+	Request   entities.RequestEntity  `json:"request" bson:"request"`
+	Response  entities.ResponseEntity `json:"response" bson:"response"`
 }
 
 func (g PrototypeModel) GetID() string {
@@ -14,11 +19,17 @@ func (g PrototypeModel) GetID() string {
 }
 
 type PrototypeListModel struct {
-	ID       string                 `json:"id" bson:"_id,omitempty"`
-	Request  entities.RequestEntity `json:"request" bson:"request"`
-	Response map[string]any         `json:"response" bson:"response"`
+	ID        string          `json:"id" bson:"_id,omitempty"`
+	CreatedAt time.Time       `json:"createdAt" bson:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt" bson:"updatedAt"`
+	Request   RequestListView `json:"request" bson:"request"`
 }
 
 func (g PrototypeListModel) GetID() string {
 	return g.ID
+}
+
+type RequestListView struct {
+	Method  string `json:"method" binding:"required"`
+	UrlPath string `json:"urlPath" binding:"required"`
 }

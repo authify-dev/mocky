@@ -35,6 +35,8 @@ func SetupPrototypesModule(r *gin.Engine) {
 	// Routes
 	prototypesGroup := r.Group("/v1/prototypes")
 	prototypesGroup.POST("", prototypesController.Create)
+	prototypesGroup.GET("", prototypesController.List)
+	prototypesGroup.GET("/:id", prototypesController.Retrieve)
 
 	mockyGroup := r.Group("/v1/mocky")
 	mockyGroup.Any("/*path", prototypesController.Mock)
