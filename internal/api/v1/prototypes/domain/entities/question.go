@@ -88,6 +88,8 @@ type RequestEntity struct {
 	PathParams map[string]string `json:"path_params"`
 	Headers    map[string]string `json:"headers"`
 	BodySchema BodySchemaEntity  `json:"bodySchema"`
+
+	Delay int `json:"delay"`
 }
 
 type BodySchemaEntity struct {

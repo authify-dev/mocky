@@ -27,6 +27,8 @@ type RequestDTO struct {
 	Headers    map[string]string `json:"headers"`
 	PathParams map[string]string `json:"path_params"`
 	BodySchema BodySchemaDTO     `json:"bodySchema"`
+
+	Delay int `json:"delay"`
 }
 
 func (dto RequestDTO) Validate() error {
@@ -54,6 +56,7 @@ func (dto RequestDTO) ToEntity() entities.RequestEntity {
 		Headers:    dto.Headers,
 		PathParams: dto.PathParams,
 		BodySchema: dto.BodySchema.ToEntity(),
+		Delay:      dto.Delay,
 	}
 }
 

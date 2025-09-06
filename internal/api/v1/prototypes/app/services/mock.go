@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Request, pathParams map[string]string, headers map[string]string, query map[string]string) utils.Response[map[string]any] {
@@ -110,6 +111,10 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 	pretty, _ := json.MarshalIndent(resolved, "", "  ")
 	fmt.Println("=== Response con valores (faker + args opcionales) ===")
 	fmt.Println(string(pretty))
+
+	if prototypeModel.Data.Request.Delay > 0 {
+		time.Sleep(time.Duration(prototypeModel.Data.Request.Delay) * time.Millisecond)
+	}
 
 	entry.Infof("PrototypeModel: %v", prototypeModel.Data)
 
