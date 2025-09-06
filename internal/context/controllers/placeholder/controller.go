@@ -2,12 +2,8 @@ package placeholder
 
 import (
 	"encoding/json"
-	"math/rand"
 	"regexp"
 	"strings"
-	"time"
-
-	"github.com/bxcodec/faker/v4"
 )
 
 // ==== Contexto ====
@@ -16,53 +12,6 @@ type MockContext struct {
 	Query      map[string]string
 	Headers    map[string]string
 	Body       map[string]any
-}
-
-// ==== Generadores random parametrizables (args opcionales) ====
-var randomGenerators = map[string]func(args map[string]string) string{
-	// UUID sin args
-	"random.UUID": func(args map[string]string) string {
-		return faker.UUIDHyphenated()
-	},
-	// Email sin args
-	"random.Email": func(args map[string]string) string {
-		return faker.Email()
-	},
-	// Name sin args
-	"random.Name": func(args map[string]string) string {
-		return faker.Name()
-	},
-	// Phone sin args
-	"random.Phone": func(args map[string]string) string {
-		return faker.Phonenumber()
-	},
-	// Date con args opcionales: format, startDate, endDate
-	// format por defecto: 2006-01-02
-	// startDate por defecto: 1970-01-01
-	// endDate por defecto: hoy (UTC)
-	"random.Date": func(args map[string]string) string {
-		layout := getArgOr(args, "format", "2006-01-02")
-
-		startStr := getArgOr(args, "startDate", "1970-01-01")
-		endStr := getArgOr(args, "endDate", time.Now().UTC().Format("2006-01-02"))
-
-		start, err := time.Parse("2006-01-02", startStr)
-		if err != nil {
-			start = time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
-		}
-		end, err := time.Parse("2006-01-02", endStr)
-		if err != nil || end.Before(start) {
-			end = time.Now().UTC()
-		}
-
-		// pick random second in [start, end]
-		span := end.Unix() - start.Unix()
-		if span <= 0 {
-			return start.Format(layout)
-		}
-		sec := start.Unix() + rand.Int63n(span+1)
-		return time.Unix(sec, 0).UTC().Format(layout)
-	},
 }
 
 // Utilidad: obtener arg (si no existe, default)
