@@ -58,6 +58,9 @@ func (r Response[R]) ToMapWithCustomContext(ctx *customctx.CustomContext) map[st
 		r.ReportToLoki(ctx, res)
 
 	}
+	if r.Results != nil {
+		delete(res, "data")
+	}
 
 	return res
 }
