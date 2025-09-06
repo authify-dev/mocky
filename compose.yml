@@ -8,3 +8,25 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+
+  app:
+    depends_on:
+      - mongo
+    build:
+      context: .
+      dockerfile: docker_images/deploy/Dockerfile.deploy
+    container_name: msgd
+    env_file:
+      - .envs/.env.docker
+    ports:
+      - "8001:8001"
+    volumes:
+      - .:/app
+
+  testing:
+    depends_on:
+      - mongo
+    build:
+      context: .
+      dockerfile: docker_images/testing/Dockerfile.testing
+    container_name: msgd-testing
