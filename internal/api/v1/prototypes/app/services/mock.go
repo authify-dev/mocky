@@ -8,12 +8,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mocky/internal/context/controllers/placeholder"
 	"net/http"
 	"regexp"
 	"strings"
 )
 
-func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Request) utils.Response[map[string]interface{}] {
+func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Request, pathParams map[string]string, headers map[string]string, query map[string]string) utils.Response[map[string]any] {
 
 	entry := logger.FromContext(cc.Context())
 
@@ -25,7 +26,7 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 
 	if prototypeModel.Err != nil {
 		entry.Error(prototypeModel.Err.Error())
-		return utils.Response[map[string]interface{}]{
+		return utils.Response[map[string]any]{
 			Error:      prototypeModel.Err,
 			StatusCode: http.StatusNotFound,
 			Success:    false,
@@ -36,8 +37,19 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 	headersResult := s.verifyHeaders(cc, prototypeModel.Data.ID, request, prototypeModel.Data.Request.Headers)
 	if headersResult.Err != nil {
 		entry.Error(headersResult.Err.Error())
-		return utils.Response[map[string]interface{}]{
+		return utils.Response[map[string]any]{
 			Error:      headersResult.Err,
+			StatusCode: http.StatusBadRequest,
+			Success:    false,
+		}
+	}
+
+	// verificar los path params
+	pathParamsResult := s.verifyPathParams(cc, prototypeModel.Data.ID, request, prototypeModel.Data.Request.PathParams)
+	if pathParamsResult.Err != nil {
+		entry.Error(pathParamsResult.Err.Error())
+		return utils.Response[map[string]any]{
+			Error:      pathParamsResult.Err,
 			StatusCode: http.StatusBadRequest,
 			Success:    false,
 		}
@@ -48,7 +60,7 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 	bodyMap, err := _convertBodyToMap(request)
 	if err != nil {
 		entry.Error(err.Error())
-		return utils.Response[map[string]interface{}]{
+		return utils.Response[map[string]any]{
 			Error:      cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "convert_body_to_map"),
 			StatusCode: http.StatusInternalServerError,
 			Success:    false,
@@ -62,7 +74,7 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 			cc.NewError(cerrs.NewCustomError(http.StatusUnprocessableEntity, err.String(), "validate_body"))
 		}
 
-		return utils.Response[map[string]interface{}]{
+		return utils.Response[map[string]any]{
 			Error:      cerrs.NewCustomError(http.StatusUnprocessableEntity, propertiesResult[len(propertiesResult)-1].String(), "validate_body"),
 			StatusCode: http.StatusUnprocessableEntity,
 			Success:    false,
@@ -71,18 +83,80 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 
 	// Contruir la respuesta
 
-	entry.Info("PrototypeModel: %v", prototypeModel.Data)
+	pathParamsMap := request.URL.Query()
+	headersMap := request.Header
 
-	return utils.Response[map[string]interface{}]{
-		Data: map[string]interface{}{
-			"message": "Mocking request",
-			"path":    request.URL.Path,
-			"method":  request.Method,
-			"headers": request.Header,
-			"body":    request.Body,
-		},
+	fmt.Println(pathParamsMap)
+	fmt.Println(headersMap)
+	fmt.Println(bodyMap)
+
+	mockContext := placeholder.MockContext{
+		PathParams: pathParams,
+		Query:      query,
+		Headers:    headers,
+		Body:       bodyMap,
+	}
+
+	resolved, err := s.placeholderController.Resolve(mockContext, prototypeModel.Data.Response.Body)
+	if err != nil {
+		entry.Error(err.Error())
+		return utils.Response[map[string]any]{
+			Error:      cerrs.NewCustomError(http.StatusInternalServerError, err.Error(), "placeholder_controller"),
+			StatusCode: http.StatusInternalServerError,
+			Success:    false,
+		}
+	}
+
+	pretty, _ := json.MarshalIndent(resolved, "", "  ")
+	fmt.Println("=== Response con valores (faker + args opcionales) ===")
+	fmt.Println(string(pretty))
+
+	entry.Infof("PrototypeModel: %v", prototypeModel.Data)
+
+	return utils.Response[map[string]any]{
+		Data:       resolved.(map[string]any),
 		StatusCode: http.StatusOK,
 	}
+}
+
+func (s *PrototypesService) verifyPathParams(
+	cc *customctx.CustomContext,
+	prototypeID string,
+	request *http.Request,
+	pathParamsSchemas map[string]string,
+) utils.Result[map[string]interface{}] {
+	entry := logger.FromContext(cc.Context())
+
+	entry.Info("Verifying headers")
+
+	for pathParam, schema := range pathParamsSchemas {
+		fmt.Println(pathParam, schema)
+
+		pathParamReceived := request.URL.Query().Get(pathParam)
+		if pathParamReceived == "" {
+			return utils.Result[map[string]interface{}]{Err: cerrs.NewCustomError(http.StatusBadRequest, "Path param "+pathParam+" is required", "verify_path_params")}
+		}
+
+		if strings.HasPrefix(schema, "^") {
+			regex := schema[1:]
+			match, _ := regexp.MatchString(regex, pathParamReceived)
+			if !match {
+				return utils.Result[map[string]interface{}]{Err: cerrs.NewCustomError(http.StatusBadRequest, "Path param "+pathParam+" does not match the schema", "verify_path_params")}
+			}
+		} else {
+			if pathParamReceived != schema {
+				return utils.Result[map[string]interface{}]{
+					Err: cerrs.NewCustomError(
+						http.StatusBadRequest,
+						"Path param "+pathParam+" does not match the schema, check the prototype with ID: "+prototypeID,
+						"verify_path_params",
+					),
+				}
+			}
+		}
+	}
+
+	return utils.Result[map[string]interface{}]{Data: map[string]interface{}{}}
 }
 
 func (s *PrototypesService) verifyHeaders(

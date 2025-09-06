@@ -78,13 +78,14 @@ package entities
 */
 
 type PrototypeEntity struct {
-	Request RequestEntity `json:"request" binding:"required"`
-	//Response ResponseEntity `json:"response" binding:"required"`
+	Request  RequestEntity  `json:"request" binding:"required"`
+	Response ResponseEntity `json:"response" binding:"required"`
 }
 
 type RequestEntity struct {
 	Method     string            `json:"method" binding:"required"`
 	UrlPath    string            `json:"urlPath" binding:"required"`
+	PathParams map[string]string `json:"path_params"`
 	Headers    map[string]string `json:"headers"`
 	BodySchema BodySchemaEntity  `json:"bodySchema"`
 }
@@ -105,4 +106,8 @@ type PropertyEntity struct {
 	Format     string           `json:"format"`
 	Pattern    string           `json:"pattern"`
 	Properties []PropertyEntity `json:"properties"`
+}
+
+type ResponseEntity struct {
+	Body map[string]any `json:"body"`
 }

@@ -4,6 +4,7 @@ import (
 	"mocky/internal/api/v1/prototypes/app/services"
 	"mocky/internal/api/v1/prototypes/interface/controllers"
 	validator_controller "mocky/internal/context/controllers"
+	"mocky/internal/context/controllers/placeholder"
 	"mocky/internal/core/settings"
 	prototypes "mocky/internal/db/mongo/prototypes"
 
@@ -22,8 +23,11 @@ func SetupPrototypesModule(r *gin.Engine) {
 	// Validator
 	validator := validator_controller.NewValidator()
 
+	// Placeholder
+	placeholderController := placeholder.NewPlaceholderController()
+
 	// Services
-	prototypesService := services.NewPrototypesService(prototypesRepository, validator)
+	prototypesService := services.NewPrototypesService(prototypesRepository, validator, placeholderController)
 
 	// Controllers
 	prototypesController := controllers.NewPrototypesController(prototypesService)

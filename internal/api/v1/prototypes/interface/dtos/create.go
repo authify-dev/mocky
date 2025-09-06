@@ -8,7 +8,8 @@ import (
 )
 
 type CreatePrototypeDTO struct {
-	Request RequestDTO `json:"request" binding:"required"`
+	Request  RequestDTO  `json:"request" binding:"required"`
+	Response ResponseDTO `json:"response" binding:"required"`
 }
 
 func (dto CreatePrototypeDTO) Validate() error {
@@ -24,6 +25,7 @@ type RequestDTO struct {
 	Method     string            `json:"method" binding:"required"`
 	UrlPath    string            `json:"urlPath" binding:"required"`
 	Headers    map[string]string `json:"headers"`
+	PathParams map[string]string `json:"path_params"`
 	BodySchema BodySchemaDTO     `json:"bodySchema"`
 }
 
@@ -50,6 +52,7 @@ func (dto RequestDTO) ToEntity() entities.RequestEntity {
 		Method:     dto.Method,
 		UrlPath:    dto.UrlPath,
 		Headers:    dto.Headers,
+		PathParams: dto.PathParams,
 		BodySchema: dto.BodySchema.ToEntity(),
 	}
 }
@@ -134,6 +137,22 @@ func (dto PropertyDTO) ToEntity() entities.PropertyEntity {
 
 func (dto CreatePrototypeDTO) ToCommand() commands.CreatePrototypeCommand {
 	return commands.CreatePrototypeCommand{
-		Request: dto.Request.ToEntity(),
+		Request:  dto.Request.ToEntity(),
+		Response: dto.Response.ToEntity(),
+	}
+}
+
+type ResponseDTO struct {
+	Body map[string]any `json:"body"`
+}
+
+func (dto ResponseDTO) Validate() error {
+
+	return nil
+}
+
+func (dto ResponseDTO) ToEntity() entities.ResponseEntity {
+	return entities.ResponseEntity{
+		Body: dto.Body,
 	}
 }

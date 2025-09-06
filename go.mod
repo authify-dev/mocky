@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
