@@ -22,7 +22,12 @@ func (s *PrototypesService) Mock(cc *customctx.CustomContext, request *http.Requ
 
 	entry.Info("Mocking request")
 
-	realPath := strings.TrimPrefix(request.URL.Path, "/"+settings.Settings.ROOT_PATH+"/v1/mocky")
+	prevPath := ""
+	if settings.Settings.ROOT_PATH != "" {
+		prevPath = "/" + settings.Settings.ROOT_PATH
+	}
+
+	realPath := strings.TrimPrefix(request.URL.Path, prevPath+"/v1/mocky")
 
 	prototypeModel := s.prototypesRepository.GetByPath(cc, realPath, request.Method)
 

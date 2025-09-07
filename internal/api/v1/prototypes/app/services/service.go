@@ -1,19 +1,19 @@
 package services
 
 import (
+	"mocky/internal/api/v1/prototypes/domain/repositories"
 	validator_controller "mocky/internal/context/controllers"
 	"mocky/internal/context/controllers/placeholder"
-	prototypes "mocky/internal/db/mongo/prototypes"
 )
 
 type PrototypesService struct {
-	prototypesRepository  *prototypes.PrototypesMongoRepository
+	prototypesRepository  repositories.RepositoryPrototypes
 	validator             *validator_controller.ValidatorRequest
 	placeholderController *placeholder.PlaceholderController
 }
 
 func NewPrototypesService(
-	prototypesRepository *prototypes.PrototypesMongoRepository,
+	prototypesRepository repositories.RepositoryPrototypes,
 	validator *validator_controller.ValidatorRequest,
 	placeholderController *placeholder.PlaceholderController,
 ) *PrototypesService {
