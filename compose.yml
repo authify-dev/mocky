@@ -10,16 +10,16 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
 
   app:
-    depends_on:
-      - mongo
     build:
       context: .
       dockerfile: docker_images/deploy/Dockerfile.deploy
     container_name: mocky
-    env_file:
-      - .envs/.env.docker
+    environment:
+      ENVIRONMENT: development
+      MONGO_DSN: mongodb://root:example@mongo_db_mocky:27017
+      ROOT_PATH: 
     ports:
-      - "8002:8000"
+      - "8000:8000"
     volumes:
       - .:/app
 
