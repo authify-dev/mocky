@@ -25,6 +25,8 @@ type Config struct {
 	// Database
 	MONGO_DSN string `required:"true"`
 
+	ROOT_PATH string `required:"false" default:""`
+
 	LOKI_URL string `required:"false" default:"http://localhost:3100"`
 }
 
