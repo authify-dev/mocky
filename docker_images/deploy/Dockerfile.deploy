@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Cache de módulos y build para acelerar reconstrucciones
 COPY go.mod go.sum ./
+COPY common/go.mod common/go.sum ./common/
 RUN go mod download
 
 RUN pwd
@@ -20,4 +21,5 @@ COPY --from=builder /app/main .
 
 EXPOSE 8001
 CMD ["./main"]
+
 

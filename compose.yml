@@ -4,7 +4,7 @@ services:
     container_name: mongo_db_mocky
     restart: always
     ports:
-      - "27018:27017"
+      - "27019:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
@@ -15,11 +15,11 @@ services:
     build:
       context: .
       dockerfile: docker_images/deploy/Dockerfile.deploy
-    container_name: msgd
+    container_name: mocky
     env_file:
       - .envs/.env.docker
     ports:
-      - "8001:8001"
+      - "8002:8000"
     volumes:
       - .:/app
 
@@ -29,4 +29,4 @@ services:
     build:
       context: .
       dockerfile: docker_images/testing/Dockerfile.testing
-    container_name: msgd-testing
+    container_name: mocky-testing
